@@ -11,8 +11,9 @@ const count = 10;
 const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&count=${count}`;
 
 let resultsArray = [];
+let favourites = {};
 
-function updateDOM(){
+function createDOMNodes(){
     resultsArray.forEach(result => {
         // Card Container
         const card = document.createElement('div')
@@ -39,7 +40,7 @@ function updateDOM(){
         const addFav = document.createElement('p')
         addFav.classList.add('clickable')
         addFav.textContent = 'Add to Favourites'
-        // Card Text 
+        addFav.setAttribute('onclick',`saveFavourite('${result.url}')`) 
         const cardText = document.createElement('p')
         cardText.classList.add('card-text')
         cardText.textContent= result.explanation;
@@ -64,6 +65,12 @@ function updateDOM(){
     })
 }
 
+function updateDOM(){
+    // Get Favourites from local Storage
+    // if(localStorage.getItem('nasaFavourites'))
+  createDOMNodes();
+}
+
 // Get 10 Images from NASA API 
 async function getNasaPicutres(){
     try{
@@ -74,5 +81,24 @@ async function getNasaPicutres(){
         console.log(err)
     }
 }
+// Add result to Favourites
+function saveFavourite(itemUrl){
+   // Loop through Results Array to select Favourite
+   resultsArray.forEach(item => {
+        if(item.url.includes(itemUrl) && !favourites[itemUrl]){
+            favourites[itemUrl] = item;
+            console.log(favourites)
+            // Show save Confirmation for 2 Seconds
+            saveConfirmed.hidden = false;
+            setTimeout(() => {
+                saveConfirmed.hidden = true;
+            },2000)
+            // Set Favourites in local storage
+            localStorage.setItem('nasaFavourites',JSON.stringify(favourites))
+        
+        }
+   });
+}
 
+// On Load
 getNasaPicutres();
