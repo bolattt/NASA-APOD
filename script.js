@@ -5,18 +5,29 @@ const saveConfirmed = document.querySelector(".save-confirmed");
 const loader = document.querySelector(".loader");
 
 // NASA API
-const apiKey = "DEMO_KEY";
+const apiKey = "LRpLAZc8uzl4dcZscvTX3icarHx3Mfln4v8B5WHG";
 const count = 10;
 const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&count=${count}`;
 
 let resultsArray = [];
 let favourites = {};
 
+function showContent(page) {
+  window.scrollTo({ top: 0, behavior: "instant" });
+  if (page === "results") {
+    resultsNav.classList.remove("hidden");
+    favouritesNav.classList.add("hidden");
+  } else {
+    resultsNav.classList.add("hidden");
+    favouritesNav.classList.remove("hidden");
+  }
+  loader.classList.add("hidden");
+}
+
 function createDOMNodes(page) {
-  console.log(page);
   const currentArray =
     page === "results" ? resultsArray : Object.values(favourites);
-  console.log("current array", page, currentArray);
+  console.log("current array:", page, currentArray);
   currentArray.forEach((result) => {
     // Card Container
     const card = document.createElement("div");
@@ -42,7 +53,8 @@ function createDOMNodes(page) {
     // Add to Favourites
     const addFav = document.createElement("p");
     addFav.classList.add("clickable");
-    if (currentArray === "resultsArray") {
+
+    if (page === "results") {
       addFav.textContent = "Add to Favourites";
       addFav.setAttribute("onclick", `saveFavourite('${result.url}')`);
     } else {
@@ -75,6 +87,7 @@ function createDOMNodes(page) {
 }
 
 function updateDOM(page) {
+  console.log(page);
   // Get Favourites from local Storage
   if (localStorage.getItem("nasaFavourites")) {
     favourites = JSON.parse(localStorage.getItem("nasaFavourites"));
@@ -82,14 +95,17 @@ function updateDOM(page) {
   }
   imagesContainer.textContent = "";
   createDOMNodes(page);
+  showContent(page);
 }
 
 // Get 10 Images from NASA API
-async function getNasaPicutres() {
+async function getNasaPictures() {
+  // Show loader
+  loader.classList.remove("hidden");
   try {
     const response = await fetch(apiUrl);
     resultsArray = await response.json();
-    updateDOM("favourites");
+    updateDOM("results");
   } catch (err) {
     console.log(err);
   }
@@ -122,4 +138,4 @@ function deleteFavourite(url) {
 }
 
 // On Load
-getNasaPicutres();
+getNasaPictures();
